@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reno Eats - Modern Fusion Restaurant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <div class="text-2xl font-bold text-red-600">
+                    Reno Eats
+                </div>
+                <div class="space-x-6">
+                    <a href="#menu" class="hover:text-red-600">Menu</a>
+                    <a href="#order" class="hover:text-red-600">Order</a>
+                    <a href="#about" class="hover:text-red-600">About</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="relative h-96 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1600');">
+        <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+        <div class="relative max-w-7xl mx-auto px-4 h-full flex items-center">
+            <div class="text-white">
+                <h1 class="text-5xl font-bold mb-4">Modern Fusion.<br>Local Flavor.</h1>
+                <p class="text-xl mb-6">Opening Summer 2026 in Reno, NV</p>
+                <a href="#order" class="bg-red-600 text-white px-8 py-3 rounded-full hover:bg-red-700 transition">
+                    Pre-Order Now
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Promotions Banner -->
+    <div id="promo-banner" class="bg-yellow-100 border-b-2 border-yellow-400 hidden">
+        <div class="max-w-7xl mx-auto px-4 py-3 text-center">
+            <span class="font-bold text-yellow-800">🎉 SPECIAL OFFER:</span>
+            <span id="promo-text" class="text-yellow-800"></span>
+        </div>
+    </div>
+
+    <!-- Menu Section -->
+    <section id="menu" class="py-16">
+        <div class="max-w-7xl mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12">Our Menu</h2>
+            
+            <!-- Category Filter -->
+            <div class="flex justify-center space-x-4 mb-8">
+                <button class="filter-btn px-4 py-2 bg-red-600 text-white rounded-full" data-category="all">All</button>
+                <button class="filter-btn px-4 py-2 bg-gray-200 rounded-full" data-category="Appetizers">Appetizers</button>
+                <button class="filter-btn px-4 py-2 bg-gray-200 rounded-full" data-category="Sushi">Sushi</button>
+                <button class="filter-btn px-4 py-2 bg-gray-200 rounded-full" data-category="Burgers">Burgers</button>
+                <button class="filter-btn px-4 py-2 bg-gray-200 rounded-full" data-category="Noodles">Noodles</button>
+                <button class="filter-btn px-4 py-2 bg-gray-200 rounded-full" data-category="Desserts">Desserts</button>
+                <button class="filter-btn px-4 py-2 bg-gray-200 rounded-full" data-category="Beverages">Beverages</button>
+            </div>
+            
+            <!-- Menu Items Grid -->
+            <div id="menu-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Menu items will be loaded here by JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Order Section -->
+    <section id="order" class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="grid md:grid-cols-2 gap-12">
+                <!-- Cart -->
+                <div>
+                    <h3 class="text-2xl font-bold mb-4">Your Order</h3>
+                    <div id="cart" class="bg-gray-50 rounded-lg p-6 min-h-96">
+                        <div id="cart-items" class="space-y-3">
+                            <p class="text-gray-500 text-center">Your cart is empty</p>
+                        </div>
+                        <div id="cart-total" class="hidden mt-4 pt-4 border-t-2 border-gray-200">
+                            <div class="flex justify-between text-xl font-bold">
+                                <span>Total:</span>
+                                <span>$<span id="total-amount">0.00</span></span>
+                            </div>
+                            <button id="checkout-btn" class="w-full mt-4 bg-red-600 text-white py-3 rounded-lg hover:bg-red-700 transition">
+                                Proceed to Checkout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Restaurant Info -->
+                <div>
+                    <h3 class="text-2xl font-bold mb-4">Order Information</h3>
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <div class="mb-4">
+                            <i class="fas fa-clock text-red-600 mr-2"></i>
+                            <strong>Pickup Hours:</strong>
+                            <p class="ml-6">Tue-Sat: 11:00 AM - 9:00 PM<br>Sun-Mon: Closed</p>
+                        </div>
+                        <div class="mb-4">
+                            <i class="fas fa-map-marker-alt text-red-600 mr-2"></i>
+                            <strong>Location:</strong>
+                            <p class="ml-6">123 Reno Street, Reno, NV 89501</p>
+                        </div>
+                        <div class="mb-4">
+                            <i class="fas fa-phone text-red-600 mr-2"></i>
+                            <strong>Contact:</strong>
+                            <p class="ml-6">(775) 555-0123</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-16 bg-gray-100">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 class="text-4xl font-bold mb-4">About Reno Eats</h2>
+                    <p class="text-gray-700 mb-4">Reno Eats brings together the best of local ingredients with global culinary techniques. Our menu celebrates the diversity of Reno's food scene while adding a modern twist.</p>
+                    <p class="text-gray-700 mb-4">Opening in Summer 2026, we're excited to become a neighborhood favorite for both quick lunches and relaxed dinners.</p>
+                    <div class="flex space-x-4 mt-6">
+                        <i class="fab fa-instagram text-2xl text-gray-600"></i>
+                        <i class="fab fa-facebook text-2xl text-gray-600"></i>
+                        <i class="fab fa-twitter text-2xl text-gray-600"></i>
+                    </div>
+                </div>
+                <div>
+                    <img src="https://images.unsplash.com/photo-1552566626-52f8b828add9?w=600" alt="Restaurant interior" class="rounded-lg shadow-lg">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Checkout Modal -->
+    <div id="checkout-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full max-h-screen overflow-y-auto">
+            <h3 class="text-2xl font-bold mb-4">Complete Your Order</h3>
+            <form id="order-form">
+                <div class="mb-4">
+                    <label class="block mb-2">Name *</label>
+                    <input type="text" id="customer-name" required class="w-full border rounded-lg px-3 py-2">
+                </div>
+                <div class="mb-4">
+                    <label class="block mb-2">Email *</label>
+                    <input type="email" id="customer-email" required class="w-full border rounded-lg px-3 py-2">
+                </div>
+                <div class="mb-4">
+                    <label class="block mb-2">Phone (optional)</label>
+                    <input type="tel" id="customer-phone" class="w-full border rounded-lg px-3 py-2">
+                </div>
+                <div class="mb-4">
+                    <label class="block mb-2">Pickup Time *</label>
+                    <input type="datetime-local" id="pickup-time" required class="w-full border rounded-lg px-3 py-2">
+                </div>
+                <div class="mb-6">
+                    <p class="text-sm text-gray-600">* Required fields. We'll send confirmation to your email.</p>
+                </div>
+                <button type="submit" class="w-full bg-red-600 text-white py-3 rounded-lg hover:bg-red-700">Place Order</button>
+                <button type="button" id="close-modal" class="w-full mt-2 bg-gray-300 py-2 rounded-lg">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

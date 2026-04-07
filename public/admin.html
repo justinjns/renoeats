@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reno Eats - Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="max-w-7xl mx-auto p-6">
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h1 class="text-3xl font-bold text-red-600">Reno Eats Admin</h1>
+            <p class="text-gray-600">Manage orders and promotions</p>
+        </div>
+        
+        <!-- Tabs -->
+        <div class="flex space-x-2 mb-6">
+            <button onclick="showTab('orders')" id="tab-orders" class="px-6 py-3 bg-red-600 text-white rounded-lg">Orders</button>
+            <button onclick="showTab('promotions')" id="tab-promotions" class="px-6 py-3 bg-gray-300 rounded-lg">Promotions</button>
+        </div>
+        
+        <!-- Orders Tab -->
+        <div id="orders-tab" class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold">Incoming Orders</h2>
+                <button onclick="refreshOrders()" class="bg-blue-500 text-white px-4 py-2 rounded">Refresh</button>
+            </div>
+            <div id="orders-list" class="overflow-x-auto">
+                <p class="text-gray-500">Loading orders...</p>
+            </div>
+        </div>
+        
+        <!-- Promotions Tab (hidden by default) -->
+        <div id="promotions-tab" class="bg-white rounded-lg shadow-lg p-6 hidden">
+            <h2 class="text-2xl font-bold mb-4">Manage Promotions</h2>
+            <form id="promo-form" class="mb-8">
+                <div class="mb-4">
+                    <label class="block mb-2">Promotion Title</label>
+                    <input type="text" id="promo-title" required class="w-full border rounded px-3 py-2">
+                </div>
+                <div class="mb-4">
+                    <label class="block mb-2">Promotion Message</label>
+                    <textarea id="promo-content" rows="3" required class="w-full border rounded px-3 py-2"></textarea>
+                </div>
+                <div class="mb-4">
+                    <label class="block mb-2">Expiration Date (optional)</label>
+                    <input type="date" id="promo-expires" class="w-full border rounded px-3 py-2">
+                </div>
+                <button type="submit" class="bg-red-600 text-white px-6 py-2 rounded">Create Promotion</button>
+            </form>
+            
+            <h3 class="text-xl font-bold mb-4">Active Promotions</h3>
+            <div id="active-promos"></div>
+        </div>
+    </div>
+    
+    <script>
+        const API_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000' 
+            : 'https://your-backend-url.onrender.com';
+        
+        let refreshInterval;
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            showTab('orders');
+            refreshOrders();
+            refreshInterval = setInterval(refreshOrders, 30000);
+            document.getElementById('promo-form').addEventListener('submit', createPromotion);
+        });
+        
+        function showTab(tab) {
+            if (tab === 'orders') {
+                document.getElementById('orders-tab').classList.remove('hidden');
+                document.getElementById('promotions-tab').classList.add('hidden');
+                document.getElementById('tab-orders').className = 'px-6 py-3 bg-red-600 text-white rounded-lg';
+                document.getElementById('tab-promotions').className = 'px-6 py-3 bg-gray-300 rounded-lg';
+                refreshOrders();
+            } else {
+                document.getElementById('orders-tab').classList.add('hidden');
+                document.getElementById('promotions-tab').classList.remove('hidden');
+                document.getElementById('tab-orders').className = 'px-6 py-3 bg-gray-300 rounded-lg';
+                document.getElementById('tab-promotions').className = 'px-6 py-3 bg-red-600 text-white rounded-lg';
+                loadPromotions();
+            }
+        }
+        
+        async function refreshOrders() {
+            try {
+                const response = await fetch(`${API_URL}/api/admin/orders`, {
+                    headers: {
+                        'Authorization': 'Basic ' + btoa('admin:RenoEats2026')
+                    }
+                });
+                
+                if (response.status === 401) {
+                    document.getElementById('orders-list').innerHTML = '<p class="text-red-600">Authentication required. Please check your credentials.</p>';
+                    return;
+                }
+                
+                const orders = await response.json();
+                displayOrders(orders);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('orders-list').innerHTML = '<p class="text-red-600">Error loading orders.</p>';
+            }
+        }
+        
+        function displayOrders(orders) {
+            if (orders.length === 0) {
+                document.getElementById('orders-list').innerHTML = '<p class="text-gray-500">No orders yet.</p>';
+                return;
+            }
+            
+            const statusColors = {
+                pending: 'bg-yellow-100 text-yellow-800',
+                confirmed: 'bg-blue-100 text-blue-800',
+                ready: 'bg-green-100 text-green-800',
+                picked_up: 'bg-gray-100 text-gray-800'
+            };
+            
+            document.getElementById('orders-list').innerHTML = `
+                <table class="min-w-full">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="px-4 py-2 text-left">Order #</th>
+                            <th class="px-4 py-2 text-left">Customer</th>
+                            <th class="px-4 py-2 text-left">Pickup Time</th>
+                            <th class="px-4 py-2 text-left">Items</th>
+                            <th class="px-4 py-2 text-left">Total</th>
+                            <th class="px-4 py-2 text-left">Status</th>
+                            <th class="px-4 py-2 text-left">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${orders.map(order => `
+                            <tr class="border-b">
+                                <td class="px-4 py-3">#${order.id}</td>
+                                <td class="px-4 py-3">
+                                    ${escapeHtml(order.customer_name)}<br>
+                                    <small class="text-gray-500">${escapeHtml(order.customer_email)}</small>
+                                </td>
+                                <td class="px-4 py-3">${new Date(order.pickup_time).toLocaleString()}</td>
+                                <td class="px-4 py-3">
+                                    ${JSON.parse(order.items_json).map(item => 
+                                        `${item.quantity}x ${escapeHtml(item.name)}`
+                                    ).join('<br>')}
+                                </td>
+                                <td class="px-4 py-3">$${order.total}</td>
+                                <td class="px-4 py-3">
+                                    <span class="px-2 py-1 rounded text-sm ${statusColors[order.status]}">${order.status}</span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <select onchange="updateStatus(${order.id}, this.value)" class="border rounded px-2 py-1">
+                                        <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
+                                        <option value="confirmed" ${order.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
+                                        <option value="ready" ${order.status === 'ready' ? 'selected' : ''}>Ready</option>
+                                        <option value="picked_up" ${order.status === 'picked_up' ? 'selected' : ''}>Picked Up</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+        
+        async function updateStatus(orderId, status) {
+            try {
+                const response = await fetch(`${API_URL}/api/admin/orders/${orderId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Basic ' + btoa('admin:RenoEats2026')
+                    },
+                    body: JSON.stringify({ status })
+                });
+                
+                if (response.ok) {
+                    refreshOrders();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        
+        async function createPromotion(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('promo-title').value;
+            const content = document.getElementById('promo-content').value;
+            const expires_at = document.getElementById('promo-expires').value;
+            
+            try {
+                const response = await fetch(`${API_URL}/api/admin/promotions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Basic ' + btoa('admin:RenoEats2026')
+                    },
+                    body: JSON.stringify({ title, content, expires_at, is_active: 1 })
+                });
+                
+                if (response.ok) {
+                    alert('Promotion created!');
+                    document.getElementById('promo-form').reset();
+                    loadPromotions();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        
+        async function loadPromotions() {
+            try {
+                const response = await fetch(`${API_URL}/api/promotions`);
+                const promotions = await response.json();
+                
+                const container = document.getElementById('active-promos');
+                if (promotions.length === 0) {
+                    container.innerHTML = '<p class="text-gray-500">No active promotions.</p>';
+                    return;
+                }
+                
+                container.innerHTML = promotions.map(promo => `
+                    <div class="border rounded p-4 mb-3">
+                        <h4 class="font-bold">${escapeHtml(promo.title)}</h4>
+                        <p>${escapeHtml(promo.content)}</p>
+                        ${promo.expires_at ? `<small class="text-gray-500">Expires: ${new Date(promo.expires_at).toLocaleDateString()}</small>` : ''}
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
